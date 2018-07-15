@@ -10,8 +10,6 @@ const dbName  = "GolangWebAppDB"
 
 func Init()  {
 
-	mongo.NewClientWithOptions()
-
 	client, err := mongo.NewClient("mongodb://localhost:27017")
 	if err != nil { log.Error(err) }
 
@@ -23,6 +21,6 @@ func Init()  {
 	users := database.Collection("users")
 	err = users.Drop(context.TODO())
 	if err != nil { log.Error(err) }
-	//users.InsertOne(context.TODO(), map[string]int{"foo": 2, "bar": 2})
+	//users.InsertOne(context.Background(), map[string]int{"foo": 2, "bar": 2})
 
 }
