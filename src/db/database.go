@@ -14,6 +14,8 @@ var database *mongo.Database
 
 func Init()  {
 
+	log.Info("Database Init")
+
 	client, err := mongo.NewClient("mongodb://localhost:27017")
 	if err != nil { log.Fatal(err) }
 
@@ -47,6 +49,8 @@ func Init()  {
 
 func GetUsers() map[string]string {
 
+	log.Info("Database GetUsers")
+
 	users := database.Collection("users")
 	cur, err := users.Find(context.Background(), nil)
 	if err != nil { log.Fatal(err) }
@@ -72,6 +76,8 @@ func GetUsers() map[string]string {
 }
 
 func GetVotes() []model.Vote {
+
+	log.Info("Database GetVotes")
 
 	votes := database.Collection("votes")
 	cur, err := votes.Find(context.Background(), nil)
