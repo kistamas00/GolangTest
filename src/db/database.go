@@ -109,7 +109,7 @@ func GetVotes() []model.Vote {
 			}
 
 			result = append(result, model.Vote{
-				Id			:	elem.Lookup("_id").ObjectID(),
+				Id			:	elem.Lookup("_id").ObjectID().Hex(),
 				Question	:	elem.Lookup("question").StringValue(),
 				Options		:	options,
 				Votes		:	votes,
