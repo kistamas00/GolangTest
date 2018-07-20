@@ -75,9 +75,9 @@ func GetUsers() map[string]string {
 	return result
 }
 
-func GetVotes() []model.Vote {
+func GetVotes(filterIds []string) []model.Vote {
 
-	log.Info("Database GetVotes")
+	log.WithField("filters", filterIds).Info("Database GetVotes")
 
 	votes := database.Collection("votes")
 	cur, err := votes.Find(context.Background(), nil)
@@ -108,12 +108,16 @@ func GetVotes() []model.Vote {
 				votes = append(votes, vote.Int64())
 			}
 
-			result = append(result, model.Vote{
+			vote := model.Vote{
 				Id			:	elem.Lookup("_id").ObjectID().Hex(),
 				Question	:	elem.Lookup("question").StringValue(),
 				Options		:	options,
 				Votes		:	votes,
-			})
+			}
+
+			if filterIds == nil || vote.IdIsInArray(filterIds) {
+				result = append(result, vote)
+			}
 		}
 	}
 	if err := cur.Err(); err != nil {
