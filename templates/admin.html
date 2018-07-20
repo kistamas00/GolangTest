@@ -24,9 +24,14 @@
         <script src="/public/js/bootstrap.min.js"></script>
 
         <script type="text/javascript">
+
             $(function () {
 
                 var votes;
+
+                function editVote(obj) {
+                    var voteId = $(obj.target).attr('data-voteId');
+                }
 
                 $.get(
                     '/admin/votes',
@@ -53,14 +58,25 @@
                                 }
                             );
                             var tr = $('<tr/>');
-
-                            var th = $(
-                                '<th/>',
+                            var th = $('<th/>');
+                            var a = $(
+                                '<a/>',
                                 {
-                                    text: vote.Question + ' ('+ vote.Id + ')'
+                                    href: '/vote/' + vote.Id,
+                                    text: vote.Question + ' ('+ vote.Id + ')'                                }
+                            );
+                            var i = $(
+                                '<i/>',
+                                {
+                                    class: 'fas fa-pencil-alt',
+                                    style: 'float: right;',
+                                    click: editVote,
+                                    'data-voteId': vote.Id
                                 }
                             );
 
+                            a.appendTo(th);
+                            i.appendTo(th);
                             th.appendTo(tr);
                             tr.appendTo(thead);
                             thead.appendTo(table);
