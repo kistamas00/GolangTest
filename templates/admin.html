@@ -12,11 +12,67 @@
 
     <body>
 
-        <nav class="navbar fixed-bottom navbar-dark bg-success">
+        <nav class="navbar fixed-bottom navbar-dark">
             <a class="navbar-brand" href="#"></a>
-            <a class="navbar-brand" href="#"><i class="fas fa-plus"></i></a>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#newItemModalCenter">
+                <i class="fas fa-plus"></i>
+            </button>
             <a class="navbar-brand" href="#"></a>
         </nav>
+
+        <iframe name="hiddenFrame" width="0" height="0" border="0" style="display: none;"></iframe>
+
+        <div class="modal fade" id="newItemModalCenter" tabindex="-1" role="dialog" aria-labelledby="newItemModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="newItemModalLongTitle">New item</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="newItemForm" role="form" target="hiddenFrame" action="/admin/votes" method="post">
+                            <div class="form-group">
+                                <label for="newItemInputQuestion">Question:</label>
+                                <input type="text" class="form-control" id="newItemInputQuestion" placeholder="e.g. 2x3=?" name="question"/>
+                            </div>
+                            <div class="form-group">
+                                <label>Options:</label>
+                                <input type="text" class="form-control" placeholder="Option #1" name="options"/>
+                                <input type="text" class="form-control" placeholder="Option #2" name="options"/>
+                                <input type="text" class="form-control" placeholder="Option #3" name="options"/>
+                                <input type="text" class="form-control" placeholder="Option #4" name="options"/>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        <button type="submit" form="newItemForm" class="btn btn-success reload">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editItemModalCenter" tabindex="-1" role="dialog" aria-labelledby="modalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editItemModalLongTitle">Edit item</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editItemForm" role="form" target="hiddenFrame" method="put"></form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        <button id="editItemButtonSave" type="button" class="btn btn-success">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="content" class="container" ></div>
 
@@ -25,14 +81,126 @@
 
         <script type="text/javascript">
 
+            function reloadPage() {
+                location.reload();
+            }
+
+            function findVoteById(votes, id) {
+
+                for (i = 0; i < votes.length; i++) {
+                    vote = votes[i];
+                    if (vote.Id === id) {
+                        return vote;
+                    }
+                }
+            }
+
             $(function () {
 
+                $('.reload').click(reloadPage);
+                $('#editItemButtonSave').click(function (obj) {
+                    var voteId = $(obj.target).attr('data-voteId');
+                    var data = $('#editItemForm').serialize();
+
+                    $.ajax({
+                        url: '/admin/votes/' + voteId,
+                        type: 'put',
+                        data: data,
+                        success: reloadPage
+                    });
+                });
+                
                 var votes;
 
                 function editVote(obj) {
                     var voteId = $(obj.target).attr('data-voteId');
+                    var vote = findVoteById(votes, voteId);
+                    var form = $('#editItemForm');
+                    var submitButton = $('#editItemButtonSave');
+
+                    form.empty();
+                    submitButton.attr('data-voteId', vote.Id);
+
+                    var div = $(
+                        '<div/>',
+                        {
+                            class: "form-group"
+                        }
+                    );
+                    var label = $(
+                        '<label/>',
+                        {
+                            for: 'editItemInputQuestion',
+                            text: 'Question:'
+                        }
+                    );
+                    var input = $(
+                        '<input/>',
+                        {
+                            type: 'text',
+                            class: 'form-control',
+                            id: 'editItemInputQuestion',
+                            placeholder: 'e.g. 2x3=?',
+                            name: 'question',
+                            value: vote.Question
+                        }
+                    );
+
+                    label.appendTo(div);
+                    input.appendTo(div);
+                    div.appendTo(form);
+
+                    div = $(
+                        '<div/>',
+                        {
+                            class: "form-group"
+                        }
+                    );
+                    label = $(
+                        '<label/>',
+                        {
+                            for: 'inputOption1',
+                            text: 'Options:'
+                        }
+                    );
+
+                    label.appendTo(div);
+
+                    for(i = 0; i < vote.Options.length; i++) {
+
+                        var option = vote.Options[i];
+
+                        var input = $(
+                            '<input/>',
+                            {
+                                type: 'text',
+                                class: 'form-control',
+                                placeholder: 'Option #' + (i+1),
+                                name: 'options',
+                                value: option
+                            }
+                        );
+                        input.appendTo(div);
+                    }
+
+                    div.appendTo(form);
+
+                    $('#editItemModalCenter').modal('show');
                 }
 
+                function deleteVote(obj) {
+                    var voteId = $(obj.target).attr('data-voteId');
+
+                    $.ajax({
+                        url: '/admin/votes/' + voteId,
+                        type: 'delete',
+                        success: function (data) {
+                            $('#' + voteId).remove();
+                        }
+                    });
+                }
+
+                // load votes
                 $.get(
                     '/admin/votes',
                     function (data) {
@@ -47,7 +215,8 @@
                             var table = $(
                                 '<table/>',
                                 {
-                                    class: 'table table-bordered'
+                                    class: 'table table-bordered',
+                                    id: vote.Id
                                 }
                             );
 
@@ -62,21 +231,37 @@
                             var a = $(
                                 '<a/>',
                                 {
-                                    href: '/vote/' + vote.Id,
+                                    href: '/letsVote/' + vote.Id,
                                     text: vote.Question + ' ('+ vote.Id + ')'                                }
                             );
-                            var i = $(
-                                '<i/>',
+                            var span = $(
+                                '<span/>',
                                 {
-                                    class: 'fas fa-pencil-alt',
-                                    style: 'float: right;',
+                                    class: 'float-right'
+                                }
+                            );
+                            var iEdit = $(
+                                '<button/>',
+                                {
+                                    class: 'fas fa-pencil-alt text-warning btn btn-light',
                                     click: editVote,
+                                    'data-voteId': vote.Id
+                                }
+                            );
+                            var iDelete = $(
+                                '<button/>',
+                                {
+                                    class: 'fas fa-trash-alt text-danger btn btn-light',
+                                    style: 'margin-left: 10px;',
+                                    click: deleteVote,
                                     'data-voteId': vote.Id
                                 }
                             );
 
                             a.appendTo(th);
-                            i.appendTo(th);
+                            iEdit.appendTo(span);
+                            iDelete.appendTo(span);
+                            span.appendTo(th);
                             th.appendTo(tr);
                             tr.appendTo(thead);
                             thead.appendTo(table);

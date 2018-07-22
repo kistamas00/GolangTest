@@ -13,12 +13,13 @@ func AddPublicAP(router *gin.Engine)  {
 	router.Use(static.Serve("/public", static.LocalFile("./public", true)))
 
 	//HTML
-	router.GET("/:id", func(c *gin.Context) {
-		// TODO
+	router.GET("/letsVote/:id", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "vote.html", nil)
 	})
 
 	// JSON
-	router.GET("/vote/:id", func(c *gin.Context) {
+	router.GET("/votes/:id", func(c *gin.Context) {
+
 		id := c.Param("id")
 		result := db.GetVotes([]string{id})
 

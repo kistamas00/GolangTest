@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>VoteApp</title>
+
+        <link rel="stylesheet" type="text/css" href="/public/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/public/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    </head>
+
+    <body>
+
+        <div id="content" class="container" ></div>
+
+        <script src="/public/js/jquery-3.3.1.min.js"></script>
+        <script src="/public/js/bootstrap.min.js"></script>
+
+        <script type="text/javascript">
+
+            $(function () {
+
+                var votes;
+
+                var voteId = window.location.pathname.split('/')[2];
+
+                $.get(
+                    '/votes/' + voteId,
+                    function (data) {
+
+                        votes = data;
+                        var content = $('#content');
+
+                        for (var i in votes) {
+
+                            var vote = votes[i];
+
+                            var table = $(
+                                '<table/>',
+                                {
+                                    class: 'table table-bordered table-hover'
+                                }
+                            );
+
+                            var thead = $(
+                                '<thead/>',
+                                {
+                                    class: 'thead-light'
+                                }
+                            );
+                            var tr = $('<tr/>');
+                            var th = $(
+                                '<th/>',
+                                {
+                                    text: vote.Question + ' ('+ vote.Id + ')'
+                                }
+                            );
+
+                            th.appendTo(tr);
+                            tr.appendTo(thead);
+                            thead.appendTo(table);
+
+                            var tbody = $('<tbody/>');
+
+                            for (var j in vote.Options) {
+
+                                var option = vote.Options[j];
+                                var voteCount = vote.Votes[j];
+
+                                tr = $('<tr/>');
+                                var td = $(
+                                    '<td/>',
+                                    {
+                                        text: option + ' (' + voteCount + ')'
+                                    }
+                                );
+
+                                tr.append(td).appendTo(tbody);
+                            }
+
+                            tbody.appendTo(table);
+
+                            table.appendTo(content);
+                        }
+                    }
+                );
+            });
+        </script>
+
+    </body>
+</html>

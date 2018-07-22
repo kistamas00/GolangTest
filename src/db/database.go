@@ -6,6 +6,8 @@ import (
 	"context"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"model"
+	"controller/common"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
 
 const dbName  = "GolangWebAppDB"
@@ -36,14 +38,14 @@ func Init()  {
 	err = votes.Drop(context.Background())
 	if err != nil { log.Fatal(err) }
 	votes.InsertOne(context.Background(), map[string]interface{}{
-		"question"	:	"Does it work?",
-		"options"	:	[]string{"Yes", "No"},
+		"question"	:	"First test question",
+		"options"	:	[]string{"First option with 1 vote", "Second option with 0 vote"},
 		"votes"		:	[]int{1, 0},
 	})
 	votes.InsertOne(context.Background(), map[string]interface{}{
-		"question"	:	"2x2=?",
-		"options"	:	[]string{":/", "5?", "4"},
-		"votes"		:	[]int{1, 2, 3},
+		"question"	:	"Second test question",
+		"options"	:	[]string{"First option with 0 vote", "Second option with 1 vote", "Third option with 8 vote"},
+		"votes"		:	[]int{0, 1, 8},
 	})
 }
 
@@ -115,7 +117,7 @@ func GetVotes(filterIds []string) []model.Vote {
 				Votes		:	votes,
 			}
 
-			if filterIds == nil || vote.IdIsInArray(filterIds) {
+			if filterIds == nil || common.Include(filterIds, vote.Id) {
 				result = append(result, vote)
 			}
 		}
@@ -127,4 +129,54 @@ func GetVotes(filterIds []string) []model.Vote {
 	cur.Close(context.Background())
 
 	return result
+}
+
+func AddVote(vote model.Vote) {
+
+	log.WithField("vote", vote).Info("Database AddVote")
+
+	votes := database.Collection("votes")
+	votes.InsertOne(context.Background(), map[string]interface{}{
+		"question"	:	vote.Question,
+		"options"	:	vote.Options,
+		"votes"		:	make([]int, len(vote.Options)),
+	})
+}
+
+func EditVote(vote model.Vote) bool {
+
+	log.WithField("vote", vote).Info("Database EditVote")
+
+	objectId, err := objectid.FromHex(vote.Id)
+
+	if err == nil {
+		votes := database.Collection("votes")
+		votes.UpdateOne(context.Background(), map[string]interface{}{"_id" : objectId}, map[string]interface{}{
+			"$set":	map[string]interface{}{
+				"question": vote.Question,
+				"options":  vote.Options,
+				"votes":    make([]int, len(vote.Options)),
+			},
+		})
+		return true
+	} else {
+		log.WithField("error", err).Error("Error creating objectID from hex: ", vote.Id)
+		return false
+	}
+}
+
+func RemoveVote(id string) bool {
+
+	log.WithField("id", id).Info("Database RemoveVote")
+
+	objectId, err := objectid.FromHex(id)
+
+	if err == nil {
+		votes := database.Collection("votes")
+		votes.DeleteOne(context.Background(), map[string]interface{}{"_id" : objectId})
+		return true
+	} else {
+		log.WithField("error", err).Error("Error creating objectID from hex: ", id)
+		return false
+	}
 }
