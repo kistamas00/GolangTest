@@ -12,14 +12,28 @@
 
     <body>
 
-        <div id="content" class="container" ></div>
+        <div id="content" class="container"></div>
 
         <script src="/public/js/jquery-3.3.1.min.js"></script>
         <script src="/public/js/bootstrap.min.js"></script>
 
         <script type="text/javascript">
 
+            function reloadPage() {
+                location.reload();
+            }
+
             $(function () {
+
+                function increaseVoteCount() {
+                    var optionIndex = $(this).parent().index();
+
+                    $.ajax({
+                        url: '/votes/' + voteId + '/inc/' + optionIndex,
+                        type: 'put',
+                        success: reloadPage
+                    });
+                }
 
                 var votes;
 
@@ -39,7 +53,8 @@
                             var table = $(
                                 '<table/>',
                                 {
-                                    class: 'table table-bordered table-hover'
+                                    class: 'table table-bordered table-hover',
+                                    id: vote.Id
                                 }
                             );
 
@@ -72,7 +87,8 @@
                                 var td = $(
                                     '<td/>',
                                     {
-                                        text: option + ' (' + voteCount + ')'
+                                        text: option + ' (' + voteCount + ')',
+                                        click: increaseVoteCount
                                     }
                                 );
 

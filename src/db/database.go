@@ -8,6 +8,7 @@ import (
 	"model"
 	"controller/common"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"strconv"
 )
 
 const dbName  = "GolangWebAppDB"
@@ -174,6 +175,26 @@ func RemoveVote(id string) bool {
 	if err == nil {
 		votes := database.Collection("votes")
 		votes.DeleteOne(context.Background(), map[string]interface{}{"_id" : objectId})
+		return true
+	} else {
+		log.WithField("error", err).Error("Error creating objectID from hex: ", id)
+		return false
+	}
+}
+
+func IncreaseVoteCount(id string, optionIndex int) bool {
+
+	log.WithFields(log.Fields{"id" : id, "optionIndex" : optionIndex}).Info("Database IncreaseVoteCount")
+
+	objectId, err := objectid.FromHex(id)
+
+	if err == nil {
+		votes := database.Collection("votes")
+		votes.UpdateOne(context.Background(), map[string]interface{}{"_id" : objectId}, map[string]interface{}{
+			"$inc" : map[string]interface{}{
+				"votes." + strconv.Itoa(optionIndex) : 1,
+			},
+		})
 		return true
 	} else {
 		log.WithField("error", err).Error("Error creating objectID from hex: ", id)
