@@ -8,19 +8,26 @@ import (
 	"github.com/toorop/gin-logrus"
 )
 
+func GetMainEngine() *gin.Engine {
+
+	log := logrus.New()
+	engine := gin.New()
+
+	engine.LoadHTMLGlob("./templates/*")
+
+	engine.Use(ginlogrus.Logger(log), gin.Recovery())
+
+	controller.AddPublicAP(engine)
+	controller.AddAdminAP(engine)
+
+	return engine
+}
+
 func main() {
 
 	db.Init()
 
-	log := logrus.New()
-	router := gin.New()
+	engine := GetMainEngine()
 
-	router.LoadHTMLGlob("./templates/*")
-
-	router.Use(ginlogrus.Logger(log), gin.Recovery())
-
-	controller.AddPublicAP(router)
-	controller.AddAdminAP(router)
-
-	router.Run()
+	engine.Run()
 }

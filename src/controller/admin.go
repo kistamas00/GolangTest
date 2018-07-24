@@ -8,9 +8,9 @@ import (
 	"controller/common"
 )
 
-func AddAdminAP(router *gin.Engine)  {
+func AddAdminAP(engine *gin.Engine)  {
 
-	authorized := router.Group("/admin", gin.BasicAuth(db.GetUsers()))
+	authorized := engine.Group("/admin", gin.BasicAuth(db.GetUsers()))
 
 	// HTML
 	authorized.GET("/", func(c *gin.Context) {

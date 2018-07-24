@@ -8,18 +8,18 @@ import (
 	"strconv"
 )
 
-func AddPublicAP(router *gin.Engine)  {
+func AddPublicAP(engine *gin.Engine)  {
 
 	// STATIC
-	router.Use(static.Serve("/public", static.LocalFile("./public", true)))
+	engine.Use(static.Serve("/public", static.LocalFile("./public", true)))
 
 	//HTML
-	router.GET("/letsVote/:id", func(c *gin.Context) {
+	engine.GET("/letsVote/:id", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "vote.html", nil)
 	})
 
 	// JSON
-	router.GET("/votes/:id", func(c *gin.Context) {
+	engine.GET("/votes/:id", func(c *gin.Context) {
 
 		id := c.Param("id")
 		result := db.GetVotes([]string{id})
@@ -30,7 +30,7 @@ func AddPublicAP(router *gin.Engine)  {
 			c.JSON(http.StatusOK, result)
 		}
 	})
-	router.PUT("/votes/:id/inc/:optionIndex", func(c *gin.Context) {
+	engine.PUT("/votes/:id/inc/:optionIndex", func(c *gin.Context) {
 
 		id := c.Param("id")
 		optionIndex, err := strconv.Atoi(c.Param("optionIndex"))
