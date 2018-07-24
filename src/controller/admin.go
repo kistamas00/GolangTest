@@ -8,7 +8,7 @@ import (
 	"controller/common"
 )
 
-func AddAdminAP(engine *gin.Engine)  {
+func AddAdminAP(engine *gin.Engine, db db.DataBase)  {
 
 	authorized := engine.Group("/admin", gin.BasicAuth(db.GetUsers()))
 

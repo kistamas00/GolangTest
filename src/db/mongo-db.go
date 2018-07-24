@@ -11,11 +11,13 @@ import (
 	"strconv"
 )
 
-const dbName  = "GolangWebAppDB"
+const mongoDbName  = "GolangWebAppDB"
 
-var database *mongo.Database
+type MongoDB struct {
+	database *mongo.Database
+}
 
-func Init()  {
+func (db *MongoDB) Init()  {
 
 	log.Info("Database Init")
 
@@ -25,7 +27,8 @@ func Init()  {
 	err = client.Connect(context.Background())
 	if err != nil { log.Fatal(err) }
 
-	database = client.Database(dbName)
+	db.database = client.Database(mongoDbName)
+	database := db.database
 
 	users := database.Collection("users")
 	err = users.Drop(context.Background())
@@ -50,9 +53,11 @@ func Init()  {
 	})
 }
 
-func GetUsers() map[string]string {
+func (db *MongoDB) GetUsers() map[string]string {
 
 	log.Info("Database GetUsers")
+
+	database := db.database
 
 	users := database.Collection("users")
 	cur, err := users.Find(context.Background(), nil)
@@ -78,9 +83,11 @@ func GetUsers() map[string]string {
 	return result
 }
 
-func GetVotes(filterIds []string) []model.Vote {
+func (db *MongoDB) GetVotes(filterIds []string) []model.Vote {
 
 	log.WithField("filters", filterIds).Info("Database GetVotes")
+
+	database := db.database
 
 	votes := database.Collection("votes")
 	cur, err := votes.Find(context.Background(), nil)
@@ -132,9 +139,11 @@ func GetVotes(filterIds []string) []model.Vote {
 	return result
 }
 
-func AddVote(vote model.Vote) {
+func (db *MongoDB) AddVote(vote model.Vote) {
 
 	log.WithField("vote", vote).Info("Database AddVote")
+
+	database := db.database
 
 	votes := database.Collection("votes")
 	votes.InsertOne(context.Background(), map[string]interface{}{
@@ -144,9 +153,11 @@ func AddVote(vote model.Vote) {
 	})
 }
 
-func EditVote(vote model.Vote) bool {
+func (db *MongoDB) EditVote(vote model.Vote) bool {
 
 	log.WithField("vote", vote).Info("Database EditVote")
+
+	database := db.database
 
 	objectId, err := objectid.FromHex(vote.Id)
 
@@ -166,9 +177,11 @@ func EditVote(vote model.Vote) bool {
 	}
 }
 
-func RemoveVote(id string) bool {
+func (db *MongoDB) RemoveVote(id string) bool {
 
 	log.WithField("id", id).Info("Database RemoveVote")
+
+	database := db.database
 
 	objectId, err := objectid.FromHex(id)
 
@@ -182,9 +195,11 @@ func RemoveVote(id string) bool {
 	}
 }
 
-func IncreaseVoteCount(id string, optionIndex int) bool {
+func (db *MongoDB) IncreaseVoteCount(id string, optionIndex int) bool {
 
 	log.WithFields(log.Fields{"id" : id, "optionIndex" : optionIndex}).Info("Database IncreaseVoteCount")
+
+	database := db.database
 
 	objectId, err := objectid.FromHex(id)
 

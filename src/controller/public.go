@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func AddPublicAP(engine *gin.Engine)  {
+func AddPublicAP(engine *gin.Engine, db db.DataBase)  {
 
 	// STATIC
 	engine.Use(static.Serve("/public", static.LocalFile("./public", true)))
