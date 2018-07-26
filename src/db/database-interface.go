@@ -4,6 +4,7 @@ import "model"
 
 type DataBase interface {
 	Init()
+	ClearDbAndInsertSamples()
 	GetUsers() map[string]string
 	GetVotes(filterIds []string) []model.Vote
 	AddVote(vote model.Vote)

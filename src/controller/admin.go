@@ -10,7 +10,7 @@ import (
 
 func AddAdminAP(engine *gin.Engine, db db.DataBase)  {
 
-	authorized := engine.Group("/admin", gin.BasicAuth(db.GetUsers()))
+	authorized := engine.Group("/admin", gin.BasicAuth( db.GetUsers() ))
 
 	// HTML
 	authorized.GET("/", func(c *gin.Context) {

@@ -28,10 +28,16 @@ func (db *MongoDB) Init()  {
 	if err != nil { log.Fatal(err) }
 
 	db.database = client.Database(mongoDbName)
+}
+
+func (db *MongoDB) ClearDbAndInsertSamples()  {
+
+	log.Info("Database InsertSampleData")
+
 	database := db.database
 
 	users := database.Collection("users")
-	err = users.Drop(context.Background())
+	err := users.Drop(context.Background())
 	if err != nil { log.Fatal(err) }
 	users.InsertOne(context.Background(), map[string]string{
 		"username" : "admin",
