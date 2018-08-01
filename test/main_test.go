@@ -296,3 +296,59 @@ func TestAdminDeleteVotes (t *testing.T) {
 		t.Fail()
 	}
 }
+func TestAdminPostVotesFormValidator (t *testing.T) {
+
+	ts := httptest.NewServer(engine.NewEngine(&db))
+	defer ts.Close()
+
+	req, err := http.NewRequest("POST", ts.URL + "/admin/votes",
+		strings.NewReader("question=testquestion&options=testoption"))
+
+	if err != nil {
+		log.Println("HTTP request creation error!")
+		t.Fail()
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.SetBasicAuth("testuser", "testpass")
+	client := &http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil {
+		log.Println("HTTP post error!")
+		t.Fail()
+	}
+
+	if res.StatusCode != http.StatusBadRequest {
+		log.Println("Wrong status code!")
+		t.Fail()
+	}
+}
+func TestAdminPutVotesFormValidator (t *testing.T) {
+
+	ts := httptest.NewServer(engine.NewEngine(&db))
+	defer ts.Close()
+
+	req, err := http.NewRequest("PUT", ts.URL + "/admin/votes/testid",
+		strings.NewReader("options=testoption1&options=testoption2"))
+
+	if err != nil {
+		log.Println("HTTP request creation error!")
+		t.Fail()
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.SetBasicAuth("testuser", "testpass")
+	client := &http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil {
+		log.Println("HTTP put error!")
+		t.Fail()
+	}
+
+	if res.StatusCode != http.StatusBadRequest {
+		log.Println("Wrong status code!")
+		t.Fail()
+	}
+}
