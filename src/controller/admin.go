@@ -14,7 +14,7 @@ func AddAdminAP(engine *gin.Engine, db db.DataBase)  {
 
 	// HTML
 	authorized.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "admin.html", nil)
+		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
 	// JSON
@@ -23,8 +23,8 @@ func AddAdminAP(engine *gin.Engine, db db.DataBase)  {
 	})
 	authorized.POST("/votes", func(c *gin.Context) {
 
-		question := c.PostForm("question")
-		options := c.PostFormArray("options")
+		question := c.PostForm("Question")
+		options := c.PostFormArray("Options")
 
 		options = common.Filter(options, func(s string) bool {
 			return s != ""
@@ -46,8 +46,8 @@ func AddAdminAP(engine *gin.Engine, db db.DataBase)  {
 	authorized.PUT("/votes/:id", func(c *gin.Context) {
 
 		id := c.Param("id")
-		question := c.PostForm("question")
-		options := c.PostFormArray("options")
+		question := c.PostForm("Question")
+		options := c.PostFormArray("Options")
 
 		options = common.Filter(options, func(s string) bool {
 			return s != ""

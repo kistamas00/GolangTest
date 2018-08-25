@@ -15,7 +15,7 @@ func AddPublicAP(engine *gin.Engine, db db.DataBase)  {
 
 	//HTML
 	engine.GET("/letsVote/:id", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "vote.html", nil)
+		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
 	// JSON
