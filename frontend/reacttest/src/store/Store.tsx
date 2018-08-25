@@ -20,9 +20,7 @@ const saveVoteInDB = (vote: IVote) => {
     method: m
   }).then(res => res.json())
     .then(json => {
-      if (!vote.Id) {
-        updateVoteFromDB();
-      }
+      updateVoteFromDB();
     })
     .catch(error => error);
 };
