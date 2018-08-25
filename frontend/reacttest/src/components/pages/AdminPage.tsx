@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
-import {default as Store, DELETE_VOTE, EDIT_VOTE, NEW_VOTE} from "../../store/Store";
+import {default as Store, DELETE_VOTE, EDIT_VOTE, NEW_VOTE, updateVoteFromDB} from "../../store/Store";
 import Modal from "../modal/Modal";
 import NavBar from '../navbar/Navbar';
 import {IVote} from "../votes/IVote";
@@ -9,6 +9,8 @@ import VoteItem from '../votes/VoteItem';
 class AdminPage extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
+
+    updateVoteFromDB();
 
     this.state = {editVote: {}};
 
@@ -23,7 +25,7 @@ class AdminPage extends React.Component<any, any> {
         <Modal modalId="newItemModalCenter" vote={this.state.editVote as IVote} onSaveVote={this.props.onSaveVote} />
         <div className="container">
           {
-            this.props.votes.map((v: any, i: number) => {
+            this.props.votes && this.props.votes.map((v: any, i: number) => {
               const key = v.Id ? v.Id : i;
               return (
                 <VoteItem key={key} vote={v} onEditVoteShowModal={this.onEditVoteShowModal} onDeleteVote={this.onDeleteVote}/>

@@ -1,22 +1,73 @@
 import { createStore } from 'redux';
 import {IVote} from "../components/votes/IVote";
 
-const initialState = [{"Id":"5b7bf53dc54d5a9c407fe6a6","Question":"First test question","Options":["First option with 1 vote","Second option with 0 vote"],"Votes":[1,0]},{"Id":"5b7bf53dc54d5a9c407fe6a7","Question":"Second test question","Options":["First option with 0 vote","Second option with 1 vote","Third option with 8 vote"],"Votes":[0,1,8]}];
+const saveVoteInDB = (vote: IVote) => {
+  let m;
+  let u;
+  if (vote.Id) {
+    m = 'PUT';
+    u = '/admin/votes/'+vote.Id;
+  } else {
+    m = 'POST';
+    u = '/admin/votes';
+  }
 
-const reducer = (state = initialState, action: any) => {
+  fetch(u, {
+    body: $.param(vote, true),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+    },
+    method: m
+  }).then(res => res.json())
+    .then(json => {
+      if (!vote.Id) {
+        updateVoteFromDB();
+      }
+    })
+    .catch(error => error);
+};
+
+const deleteVoteInDB = (id: string) => {
+  fetch('/admin/votes/'+id, {
+    method: 'DELETE'
+  }).then(res => res.json())
+    .then(json => json)
+    .catch(error => error);
+};
+
+const increaseVoteInDB = (id: string, index: number) => {
+  fetch('/votes/'+id+'/inc/'+index, {
+    method: 'PUT'
+  }).then(res => res.json())
+    .then(json => json)
+    .catch(error => error);
+};
+
+const reducer = (state = [], action: any) => {
+
+  if (!state) {
+    state = [];
+  }
+
   switch (action.type) {
+    case UPDATE_VOTE:
+      return action.data;
     case NEW_VOTE:
+      saveVoteInDB(action.vote);
       const newState = JSON.parse(JSON.stringify(state));
       action.vote.Votes = Array(action.vote.Options.length).fill(0);
       newState.push(action.vote);
       return newState;
     case EDIT_VOTE:
+      saveVoteInDB(action.vote);
       return state.map((v: IVote) => (
         v.Id === action.vote.Id ? action.vote : JSON.parse(JSON.stringify(v))
       ));
     case DELETE_VOTE:
+      deleteVoteInDB(action.voteId);
       return state.filter((v: IVote) => (v.Id !== action.voteId));
     case INCREASE_VOTE:
+      increaseVoteInDB(action.voteId, action.voteIndex);
       return state.map((v: IVote) => {
         if (v.Id === action.voteId) {
           const newVotes = v.Votes.slice();
@@ -33,20 +84,20 @@ const reducer = (state = initialState, action: any) => {
   }
 };
 
-const updateStoreFromDB = () => {
-  fetch('http://localhost:8080/admin/votes').then(res => {
-    alert(JSON.stringify(res));
-  })
+const Store = createStore(reducer);
+
+const UPDATE_VOTE = "UPDATE_VOTE";
+
+export const updateVoteFromDB = (id?: string) => {
+  const url = id ? ('/votes/'+id) : '/admin/votes';
+  fetch(url, {
+    method: 'GET'
+  }).then(res => res.json())
+    .then(json => {
+      Store.dispatch({type: UPDATE_VOTE, data: json})
+    })
+    .catch(error => error);
 };
-
-const initializeStore = () => {
-
-  updateStoreFromDB();
-
-  return createStore(reducer);
-};
-
-const Store = initializeStore();
 
 export const NEW_VOTE = "NEW_VOTE";
 export const EDIT_VOTE = "EDIT_VOTE";

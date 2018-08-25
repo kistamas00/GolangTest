@@ -1,20 +1,33 @@
 import * as React from "react";
 import {connect} from "react-redux";
-import {INCREASE_VOTE} from "../../store/Store";
+import {INCREASE_VOTE, updateVoteFromDB} from "../../store/Store";
 import {IVote} from "../votes/IVote";
 import VoteItem from "../votes/VoteItem";
 
-const PublicPage = (props: any) => (
-  <div className="container">
-    {
-      props.vote ?
-        <VoteItem vote={props.vote} onIncreaseVote={props.onIncreaseVote} /> :
-        'Can\'t find vote \''+props.match.params.id+'\'!'
-    }
-  </div>
-);
+class PublicPage extends React.Component<any, any> {
+  constructor(props: any) {
+    super(props);
+
+    updateVoteFromDB(props.match.params.id);
+  }
+
+  public render() {
+    return (
+      <div className="container">
+        {
+          this.props.vote ?
+            <VoteItem vote={this.props.vote} onIncreaseVote={this.props.onIncreaseVote} /> :
+            'Can\'t find vote \''+this.props.match.params.id+'\'!'
+        }
+      </div>
+    )
+  }
+}
 
 const mapStateToProps = (state: any, props: any) => {
+  if (state === null) {
+    return {};
+  }
   const vote = state.filter((v: IVote) => (v.Id === props.match.params.id));
   if (vote.length === 1) {
     return {vote: vote[0]};
